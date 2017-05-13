@@ -1,0 +1,75 @@
+ElementaryTokens:
+	" " | "\t" | "\n" | "(" | ")" | "@" | "$" | "+" | "-" | "*" | "/" | "%" | "|" | "^" | "&" | "~" | "<" | "=" | ">" | ";" | "," | "[" | "]" | "!"
+Ignore:
+	" " | "\t" | "\n"
+Terminals:
+	lower -> "a"|"b"|"c"|"d"|"e"|"f"|"g"|"h"|"i"|"j"|"k"|"l"|"m"|"n"|"o"|"p"|"q"|"r"|"s"|"t"|"u"|"v"|"w"|"x"|"y"|"z"
+	upper -> "A"|"B"|"C"|"D"|"E"|"F"|"G"|"H"|"I"|"J"|"K"|"L"|"M"|"N"|"O"|"P"|"Q"|"R"|"S"|"T"|"U"|"V"|"W"|"X"|"Y"|"Z"
+	letter -> upper|lower
+	digit -> "0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"
+	string_symbol -> "_"
+	id -> (letter|string_symbol).(letter|digit|string_symbol)*
+	num -> digit.digit*
+Grammar:
+	PROGRAM -> Block
+	Block -> Line | Block Line
+	Line -> Statement ";"
+	
+	Statement -> Assignment | ControlFlow | VarDec | FunDec | Other
+	
+	Assignment -> Variable "=" Expr | Variable ModifyOp "=" Expr
+	ControlFlow -> IfStatement | WhileLoop | ForLoop
+	VarDec -> Type id | Type id "=" VarValue
+	VarValue -> "[" Array "]" | Expr 
+	FunDec -> Type id "(" InArgs ")" Block "end" | Type id "(" ")" Block "end"
+	Other -> "return" Expr | "return" | FunCall | "break" | "continue" | "pass"
+	
+	InArgs -> Type id | InArgs "," Type id
+	
+	
+	
+	Variable -> id | id "[" Expr "]" 
+	Const -> num | "@" id
+	
+	Expr -> Expr AddOp Term | UnaryOp Term | Term | TernaryOp
+	Term -> Term MulOp Factor | Factor
+	Factor -> Const | Variable | FunCall | "(" Expr ")" | TypeCast
+	
+	TernaryOp -> Expr "if" ForBoolExpr "else" Expr 
+	ModifyOp ->  AddOp | MulOp
+	
+	
+	FunCall -> id "(" Args ")" | id "(" ")"
+	Args -> Args "," Expr | Expr
+	
+	TypeCast -> Type "(" Expr ")"
+	
+	AddOp -> "+" | "-" | ">" ">" | "<" "<"
+	MulOp -> "*" | "/" | "%" | "^" | "|" | "&"
+	UnaryOp -> "~" | "-"
+	
+	
+	
+	
+	ForBoolExpr -> BoolFactor | Comparison
+	
+	BoolExpr -> "(" BoolFactor ")" | "(" Comparison ")"
+	BoolFactor -> BoolExpr | BoolFactor BoolOp BoolExpr | UnaryBoolOp BoolExpr
+	
+	Comparison -> Expr CompOp Expr | Expr
+	
+	BoolOp -> "and" | "or" | "xor"
+	UnaryBoolOp -> "not"
+	
+	CompOp -> "!" "=" | "=" "=" | "<" | ">" | NotLess | NotGreater
+	NotLess -> ">" "=" | "=" ">"
+	NotGreater -> "<" "=" | "=" "<"
+	
+	
+	
+	IfStatement -> "if" BoolExpr "then" Block "endif" | "if" BoolExpr "then" Block "else" Block "endif"
+	WhileLoop -> "while" BoolExpr "do" Block "loop"
+	ForLoop -> "for" "(" Assignment "," ForBoolExpr "," Assignment ")" Block "loop"
+	
+	Type -> "int" | "char" | "@" "int" | "@" "int" num |  "@" "char" | "@" "char" num | "void"
+	Array -> Array "," num | num

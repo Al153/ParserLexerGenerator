@@ -1,0 +1,57 @@
+ElementaryTokens:
+	" " | "\t" | "\n" | "\r" | "(" | ")" | "-"| "~"| "+"| "-"| "*"| "<"| "="| "&"| "|" | ">"| "?"| ":"| ";"| "," | "!"
+Ignore:
+	" " | "\t" | "\n" | "\r"
+Terminals:
+	lower -> "a"|"b"|"c"|"d"|"e"|"f"|"g"|"h"|"i"|"j"|"k"|"l"|"m"|"n"|"o"|"p"|"q"|"r"|"s"|"t"|"u"|"v"|"w"|"x"|"y"|"z"
+	upper -> "A"|"B"|"C"|"D"|"E"|"F"|"G"|"H"|"I"|"J"|"K"|"L"|"M"|"N"|"O"|"P"|"Q"|"R"|"S"|"T"|"U"|"V"|"W"|"X"|"Y"|"Z"
+	letter -> upper|lower
+	digit -> "0"|"1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"
+	string_symbol -> "_"
+	id -> (letter|string_symbol).(letter|digit|string_symbol)*
+	num -> digit.digit*
+	what -> "?"
+
+Grammar:
+	PROGRAM -> expr
+
+	arrow -> "-" ">"
+	assign -> ":" "="
+	and ->  "&" "&"
+	or -> "|" "|"
+	unit -> "(" ")"
+
+	uop -> "-" | "~" | "ref" | "!" | "snd" | "fst" | "inl" t_expr | "inr" t_expr
+	mulop ->  "*" | and | or | "=" | "<"  
+	addop -> "+" | "-"
+	assop -> assign
+
+	t_expr -> t_sum arrow t_expr | t_sum
+	t_sum -> t_sum "+" t_term | t_term
+	t_term -> t_term "*" t_fact | t_fact
+	t_fact -> "bool" | "int" | "unit" | "(" t_expr ")" | t_expr "ref"
+
+	expr -> expr addop term | term | lambda | let | let_fn | let_rec_fn | assignment | while_loop | "begin" seq "end" | case_expr
+
+	term -> term mulop factor | factor
+		
+	factor -> ternary_expr | composition
+
+	composition ->  composition expr | value
+
+			
+
+	seq -> expr | expr ";" seq
+	ternary_expr -> "if" expr "then" expr "else" expr "end"
+	while_loop -> "while" expr "do" expr "end"
+	lambda -> "fun" "(" id ":" t_expr ")" arrow expr "end"
+	let -> "let" id ":" t_expr "=" expr "in" expr "end"
+	let_fn -> "let" id "(" id ":" t_expr ")" ":" t_expr "=" expr "in" expr "end"
+	let_rec_fn -> "let" "rec" id "(" id ":" t_expr ")" ":" t_expr "=" expr "in" expr "end"
+	assignment -> value assop expr
+	case_expr -> "case" expr "of" "inl" "(" id ":" t_expr ")" arrow expr "|" "inr" "(" id ":" t_expr ")" arrow expr "end"
+
+
+
+	const -> num | unit | "true" | "false" | what
+	value -> const | id | "(" expr ")" | "(" expr "," expr ")" | uop value

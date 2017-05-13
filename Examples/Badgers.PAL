@@ -1,0 +1,16 @@
+ElementaryTokens:
+	" " | "(" | ")" | "+"
+
+Ignore:
+	" " | "dud"
+
+Terminals:
+	zook -> "badger"*."mushroom"
+	kazam -> zook*."Snake"
+	eek -> ("foo"|"bar")
+
+Grammar:
+	PROGRAM -> Foo kazam
+	Foo -> Foo "+" Bar | Bar 
+	Bar -> Bazingah | "(" Foo ")"
+	Bazingah -> zook | eek

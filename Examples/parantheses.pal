@@ -1,0 +1,11 @@
+ElementaryTokens:
+	" " | "(" | ")"
+
+Ignore:
+	" "
+
+Terminals:
+
+Grammar:
+	PROGRAM -> A
+	A -> "(" A ")" | "(" ")"

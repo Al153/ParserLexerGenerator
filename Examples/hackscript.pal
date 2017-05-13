@@ -1,0 +1,35 @@
+ElementaryTokens:
+	" " | "\t" | "\n" | "(" | ")" | "+" | "-" | "*" | "/" | "%" | "|" | "^" | "&" | "~" | "<" | "=" | ">" | ";" | "," | "[" | "]" | "!" | "{" | "}" | "."
+Ignore:
+	" " | "\t" | "\n"
+Terminals:
+	lower -> "a"|"b"|"c"|"d"|"e"|"f"|"g"|"h"|"i"|"j"|"k"|"l"|"m"|"n"|"o"|"p"|"q"|"r"|"s"|"t"|"u"|"v"|"w"|"x"|"y"|"z"
+	upper -> "A"|"B"|"C"|"D"|"E"|"F"|"G"|"H"|"I"|"J"|"K"|"L"|"M"|"N"|"O"|"P"|"Q"|"R"|"S"|"T"|"U"|"V"|"W"|"X"|"Y"|"Z"
+	letter -> upper|lower
+	pos_digit -> "1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"
+	digit -> "0"|pos_digit
+	string_symbol -> "_"
+	name -> (letter|string_symbol).(letter|digit|string_symbol)* -- a name can be that of a function or dicts or fields of dicts.
+	floatFract -> digit.digit*
+	num -> (pos_digit.digit*)|"0"
+	variable -> "$".name -- a variable is the name of a stream end ( they act as nodes in a net list)
+
+PROGRAM -> Lines
+Lines -> Lines Line ";" | Line ";" 
+Line -> StreamStatement | NameDeclaration
+
+-- A dict is the fundamental object of computation in hackScript. It is a functional object - ie immutable
+-- it consists of a number of fields. 
+-- each field is named and can contain a primitive (string,int,float,[function??]) or another dict
+	
+NameDeclaration -> name "=" FunctionDeclaration | name "=" pipeParams | name "=" name | name = value --what is a value?
+FunctionDeclaration -> "(" FunParams ":" FunExpr ")"	-- A function is similar to a lambda statement applied to the dicts entering it via a stream
+						-- functions can construct dicts and access members of them
+pipeLineDeclaration -> "(" pipeParams ")" "-" ">" "(" pipeParams")" "{" Lines "}"   -- a pipeLine 
+
+pipeParams -> pipeParams "," variable |  variable
+FunParams -> FunParams "," name | name
+
+StreamStatement -> StreamStatement ">>" StreamExpression | StreamSource
+StreamSource -> "(" StreamCollection ")" | variable | name -- there are various "built in names"
+StreamExpression

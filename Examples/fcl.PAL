@@ -1,0 +1,77 @@
+-- Possible grammar for a new Language compiled by forth into forth assembler
+
+-- Want to include: no pointer arithmetic, only references.
+--					User defined types (structs)
+--					Primitives: Ints, Floats, Chars 
+-- 					Tuples
+-- 					Not polymorphic
+--
+
+ElementaryTokens:
+	" " | "\t" | "\n" | "(" | ")" | "+" | "-" | "*" | "/" | "%" | "|" | "^" | "&" | "~" | "<" | "=" | ">" | ";" | "," | "[" | "]" | "!" | "{" | "}" | "."
+Ignore:
+	" " | "\t" | "\n"
+Terminals:
+	lower -> "a"|"b"|"c"|"d"|"e"|"f"|"g"|"h"|"i"|"j"|"k"|"l"|"m"|"n"|"o"|"p"|"q"|"r"|"s"|"t"|"u"|"v"|"w"|"x"|"y"|"z"
+	upper -> "A"|"B"|"C"|"D"|"E"|"F"|"G"|"H"|"I"|"J"|"K"|"L"|"M"|"N"|"O"|"P"|"Q"|"R"|"S"|"T"|"U"|"V"|"W"|"X"|"Y"|"Z"
+	letter -> upper|lower
+	pos_digit -> "1"|"2"|"3"|"4"|"5"|"6"|"7"|"8"|"9"
+	digit -> "0"|pos_digit
+	string_symbol -> "_"
+	id -> (letter|string_symbol).(letter|digit|string_symbol)*
+	floatFract -> digit.digit*
+	num -> (pos_digit.digit*)|"0"
+	chr -> num."c"
+
+Grammar:
+	PROGRAM -> Block
+
+	Block -> Block Line  | Line
+	Line -> Simple ";" | Extended -- extended  parts end with a line
+	Simple -> Statement | VarDec | PureFunDec | FunCall | "break" | "continue" | "return" Expr
+	Extended -> FunDec |  TypeDec |  IfStatement | WhileLoop | ForLoop | "{" Block "}" | Scope 
+	
+	Scope -> "scope" id Line
+	
+	Statement -> StatementVar "=" Expr
+	Expr ->  FunCall | Expr AddOp Term | Term | UnOp Term | TernaryOp
+	Term -> Term MulOp Factor | Factor
+	Factor -> "(" Expr ")" | Value
+	
+	TernaryOp -> "if" Expr "then" Expr "else" Expr
+	Value -> TypeInst | Primitive | StatementVar
+	
+	MulOp -> "*" | "/" | "mod" | "&" | "^" | "andalso" 
+	AddOp -> "+" | "-" | "|" | "orelse" | BoolComp
+	UnOp -> "-" | "~" | "not"
+	BoolComp -> "=" "=" | "<" | ">" | "!" "=" | BoolLessEq | BoolGreaterEq
+	BoolLessEq -> "<" "=" | "=" "<"
+	BoolGreaterEq -> ">" "=" | "=" ">"
+	
+	
+	TypeDec ->  "type" id "=" "{" TDefInner "}"
+	TDefInner -> TDefInner VarDec ";" | VarDec ";"
+	
+	FunCall -> StatementVar Args | Type "(" Expr ")"
+	Args -> Args Expr | Expr
+	
+	IfStatement -> "if" "(" Expr ")" Line | "if" "(" Expr ")" Line "else" Line -- expressions in if statements, for loops and while loops should all be of type bool
+	ForLoop -> "for" "(" ForInstantiation ";" Expr ";" Statement ")" Line
+	ForInstantiation -> Statement | VarDec
+	WhileLoop -> "while" "(" Expr ")" Line
+	PureFunDec -> Type id "(" FunArgs ")" "=" Expr
+	
+	
+	Type -> "type" id | Type "[" "]" | "int" | "char" | "float" | "unit" | "bool" | FunType
+	FunType -> "(" TypeList "-" ">" Type ")"
+	TypeList -> Type | TypeList "*" Type
+	FunArgs -> FunArg | FunArgs "," FunArg
+	FunArg -> Type id
+	StatementVar -> id | StatementVar "[" Expr "]" | StatementVar "." id | Expr "." id
+	
+	FunDec -> Type id "(" FunArgs ")" Line
+	Primitive -> num | fp | "True" | "False" | chr | "Null" | "(" ")"
+	Fp -> num "." floatFract | num "." num
+	TypeInst -> "new" Type | Primitive | "new" Type "[" Expr "]" 
+	VarDec -> Type id | Type id "=" Expr
+

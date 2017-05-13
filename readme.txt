@@ -1,0 +1,1 @@
+This is the start for what is hopefully a light weight  parser and lexer generator with custom regex defined terminal tokens
